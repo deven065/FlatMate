@@ -1,23 +1,64 @@
-<<<<<<< HEAD
-# React + Vite
+# 🏢 FlatMate - Society Maintenance Management App (Admin Panel)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**FlatMate** is a modern web application designed to streamline the management of housing society maintenance tasks. This project is built with **React** and **Tailwind CSS**, offering a clean, responsive UI and focused admin registration functionality.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## Expanding the ESLint configuration
+- 🧑‍💼 Admin Sign-Up with validations
+- 🏠 Society flat/house number registration
+- 📧 Email authentication fields
+- 🔐 Secure password and confirmation input
+- 🎨 Dark-themed UI using TailwindCSS
+- 🔁 Member vs Admin toggle tabs
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# FlatMate
-FlatMate is a society maintenance management app to streamline tasks like online payments, resident records, announcements, and expense tracking. Built with React, Node.js, and MongoDB, it empowers gated communities with simple, secure, and transparent management.
+---
 
+## 🚀 Getting Started
 
-## 📄 License
+Follow these steps to run the project locally.
 
-This project is licensed under the [MIT License](./LICENSE).  
-© 2025 Deven Rikame. Feel free to use, modify, and distribute with proper attribution.
->>>>>>> 530c0472cc2d4ad37366c883daee3741b010d25b
+### 1. 📁 Clone the Repository
+
+```bash
+git clone https://github.com/deven065/FlatMate.git
+cd FlatMate
+```
+### 2. 📦 Install Dependencies
+```bash
+npm install
+```
+This will install the required packages listed in package.json.
+### 3. 💡 Install Tailwind CSS
+```bash
+npm install tailwindcss @tailwindcss/vite
+```
+Then, configure tailwind.config.js
+### 4. Configure TailwindCSS
+```bash
+import tailwindcss from '@tailwindcss/vite'
+export default defineConfig({
+  plugins: [
+    tailwindcss(),
+  ],
+})
+```
+Configure the Vite plugin
+Add the @tailwindcss/vite plugin to your Vite configuration.
+vite.config.ts
+
+### 5. Import Tailwind CSS
+```bash
+@import "tailwindcss";
+```
+Add an @import to your CSS file that imports Tailwind CSS. Like in our case it's index.css
+### 6. 🎨 Install React Icons
+```bash
+npm install react-icons
+```
+### 7. 🧪 Run the App
+```bash
+npm start
+```
+The app will run at: http://localhost:3000/
