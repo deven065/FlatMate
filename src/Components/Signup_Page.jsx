@@ -1,6 +1,6 @@
 // I am creating this SignUp page specifically for Admin of the scoiety
 import React, { useState } from 'react';
-import { FaUser, FaHome, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus } from 'react-icons/fa';
 
 const SignupPage = () => {
     // keeps track of whether the user is signing up as member or admin
@@ -55,7 +55,7 @@ const SignupPage = () => {
                             }`}
                             onClick = {()=> setActiveTab("admin")}
                         >
-                            <FaUser /> Admin Login
+                            <FaUserShield className = "w-5"/> Admin Login
                         </button>
                     </div>
 
@@ -125,7 +125,7 @@ const SignupPage = () => {
                         type = "submit"
                         className = "flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                     >
-                        <FaUser /> Sign Up
+                        <FaUserPlus className = "w-5"/> Sign Up
                     </button>
 
                     <p className = "text-center text-sm text-gray-300 mt-4">
