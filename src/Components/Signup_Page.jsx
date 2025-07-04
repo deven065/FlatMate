@@ -1,6 +1,6 @@
 // I am creating this SignUp page specifically for Admin of the scoiety
 import React, { useState } from 'react';
-import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus } from 'react-icons/fa';
+import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
 
 const SignupPage = () => {
     // keeps track of whether the user is signing up as member or admin
@@ -26,10 +26,11 @@ const SignupPage = () => {
     }
     return (
         <div className = "min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors  duration-300">
+        {/* Optional Dark Mode toggle button */}
             <button
                 onClick = {toggleDarkMode}
-                className = "absolute top-4 right-4 px-4 py-2 bg-gray-200  dark:bg-gray-700 text-gray-800 dark:text-white rounded"
-            >{isDarkMode ? "🔆 Light" : "🌙 Dark"}
+                className = "absolute top-4 right-4 px-4 py-2 bg-transparent border-1  dark:bg-gray-700 text-gray-800 dark:text-white rounded"
+            >{isDarkMode ? "🔆 Light Mode" : "🌙 Dark Mode"}
             </button>
             <form className = "bg-[#1e293b] text-white p-8 rounded-xl shadow-xl w-full max-w-md">
                     <h1 className= "text-2xl font-bold text-center mb-2">FlatMate</h1>
@@ -125,16 +126,13 @@ const SignupPage = () => {
                         type = "submit"
                         className = "flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                     >
-                        <FaUserPlus className = "w-5"/> Sign Up
+                        <FaSignInAlt className = ""/> Sign Up
                     </button>
 
                     <p className = "text-center text-sm text-gray-300 mt-4">
                         Already have an account? <span className = "text-blue-400 cursor-pointer">Sign in</span>
                     </p>
         </form>
-
-        {/* Optional Dark Mode toggle button */}
-
         </div>
     )
 }
