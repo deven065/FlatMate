@@ -62,3 +62,7 @@ npm install react-icons
 npm start
 ```
 The app will run at: http://localhost:3000/
+### 8.Install Framer motion
+```bash
+npm install framer-motion
+```
