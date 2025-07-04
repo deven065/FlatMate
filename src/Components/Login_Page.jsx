@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaSignInAlt, FaUser, FaUserShield } from 'react-icons/fa';
 import { motion } from "framer-motion";
 
 const LoginPage = () => {
@@ -35,6 +35,8 @@ const LoginPage = () => {
         }
     };
 
+    const [activeTab, setActiveTab] = useState("admin") // default: Member
+
     return (
         // Page fade-in animation
         <motion.div 
@@ -66,6 +68,33 @@ const LoginPage = () => {
                         Admin Login to Society Maintenance
                     </p>
 
+                    {/* Toggle Tabs */}
+                    <div className = "flex justify-between mb-6">
+                        <motion.button
+                            type = "button"
+                            whileHover = {{ scale: 1.05 }}
+                            whileTap = {{ scale: 0.95 }}
+                            className = {`flex items-center justify-center gap-2 flex-1 mr-2 py-2 rounded-md transition-colors ${
+                                activeTab === "member" ? "bg-blue-600" : "bg-gray-700"
+                            }`}
+                            onClick = {()=> setActiveTab("member")}
+                        >
+                            <FaUser /> Member Login
+                        </motion.button>
+
+                        <motion.button
+                            type = "button"
+                            whileHover = {{ scale: 1.05 }}
+                            whileTap = {{ scale: 0.95 }}
+                            className = {`flex items-center justify-center gap-2 flex-1 mr-2 py-2 rounded-md transition-colors ${
+                                activeTab === "admin" ? "bg-blue-600" : "bg-gray-700"
+                            }`}
+                            onClick = {() => setActiveTab("admin")}
+                        >
+                            <FaUserShield className = "w-5"/>Admin Loin
+                        </motion.button>
+                    </div>
+
                     <label className="block text-sm mb-1">Email Address</label>
                     <div className="flex items-center bg-gray-700 mb-4 rounded-md px-2">
                         <FaEnvelope className="text-gray-400" />
@@ -94,12 +123,11 @@ const LoginPage = () => {
 
                     <motion.button
                         type="submit"
-                        whileTap = {{ scale: 0.97 }}
-                        whleHover = {{ scale: 1.02 }}
-                        transition = {{ duration: 0.15 }}
+                        whileHover = {{ scale: 1.05 }}
+                        whileTap = {{ scale: 0.95 }}
                         className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                     >
-                        <FaSignInAlt /> Login
+                        <FaSignInAlt /> Sign In
                     </motion.button>
 
                     <p className="text-center text-sm text-gray-300 mt-4">

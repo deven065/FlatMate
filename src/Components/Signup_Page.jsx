@@ -1,6 +1,7 @@
 // I am creating this SignUp page specifically for Admin of the scoiety
 import React, { useState } from 'react';
 import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
+import { motion } from "framer-motion"
 
 const SignupPage = () => {
     // keeps track of whether the user is signing up as member or admin
@@ -25,13 +26,15 @@ const SignupPage = () => {
         document.documentElement.classList.toggle("dark"); // toggle class on html (if not understand then refer tailwindcss.com and go for Toggling dark mode manually)
     }
     return (
-        <div className = "min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors  duration-300">
+        <div className = "min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300">
         {/* Optional Dark Mode toggle button */}
-            <button
+            <motion.button
                 onClick = {toggleDarkMode}
-                className = "absolute top-4 right-4 px-4 py-2 bg-transparent border-1  dark:bg-gray-700 text-gray-800 dark:text-white rounded"
+                whileTap = {{ scale: 0.95 }}
+                whileHover = {{ scale: 1.05 }}
+                className = "absolute top-4 right-4 px-4 py-2 bg-transparent  dark:bg-gray-700 text-gray-800 dark:text-white rounded"
             >{isDarkMode ? "🔆 Light Mode" : "🌙 Dark Mode"}
-            </button>
+            </motion.button>
             <form className = "bg-[#1e293b] text-white p-8 rounded-xl shadow-xl w-full max-w-md">
                     <h1 className= "text-2xl font-bold text-center mb-2">FlatMate</h1>
                     <p className = "text-center mb-6 text-sm text-gray-300">
@@ -40,24 +43,28 @@ const SignupPage = () => {
                     
                     {/* Toggle Tabs */}
                     <div className = "flex justify-between mb-6">
-                        <button
+                        <motion.button
                             type = "button"
+                            whileHover = {{ scale: 1.05 }}
+                            whileTap = {{ scale: 0.95 }}
                             className = {`flex items-center justify-center gap-2 flex-1 mr-2 py-2 rounded-md transition-colors ${
                                 activeTab === 'member' ? "bg-blue-600" : "bg-gray-700"
                             }`}
                             onClick = {()=> setActiveTab("member")}
                         >
                             <FaUser /> Member Login
-                        </button>
-                        <button
+                        </motion.button>
+                        <motion.button
                             type = "button"
+                            whileHover = {{ scale: 1.05 }}
+                            whileTap = {{ scale: 0.95 }}
                             className = {`flex items-center justify-center gap-2 flex-1 py-2 rounded-md transition-colors ${
                                 activeTab === 'admin' ? "bg-blue-600" : "bg-gray-700"
                             }`}
                             onClick = {()=> setActiveTab("admin")}
                         >
                             <FaUserShield className = "w-5"/> Admin Login
-                        </button>
+                        </motion.button>
                     </div>
 
                     {/* Form Inputs */}
@@ -122,12 +129,13 @@ const SignupPage = () => {
                         />
                     </div>
 
-                    <button 
+                    <motion.button 
                         type = "submit"
+                        whileHover = {{ scale: 1.05 }}
                         className = "flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                     >
                         <FaSignInAlt className = ""/> Sign Up
-                    </button>
+                    </motion.button>
 
                     <p className = "text-center text-sm text-gray-300 mt-4">
                         Already have an account? <span className = "text-blue-400 cursor-pointer">Sign in</span>
