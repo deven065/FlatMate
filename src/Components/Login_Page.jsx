@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FaEnvelope, FaLock, FaSignInAlt, FaUser, FaUserShield } from 'react-icons/fa';
 import { motion } from "framer-motion";
+import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
     const [loginData, setLoginData] = useState({
@@ -131,7 +132,10 @@ const LoginPage = () => {
                     </motion.button>
 
                     <p className="text-center text-sm text-gray-300 mt-4">
-                        Don't have an account? <span className="text-blue-400 cursor-pointer">Sign up</span>
+                        Don't have an account?{" "}
+                        <Link to = "/signup" className = "text-blue-400 hover:underline inline">
+                            Sign up
+                        </Link>
                     </p>
                 </motion.form>
         </motion.div>

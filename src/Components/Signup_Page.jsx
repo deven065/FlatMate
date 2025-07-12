@@ -1,21 +1,32 @@
 // I am creating this SignUp page specifically for Admin of the scoiety
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
 import { motion } from "framer-motion"
+import { Link } from 'react-router-dom';
 
 const SignupPage = () => {
     // keeps track of whether the user is signing up as member or admin
     const [activeTab, setActiveTab] = useState("admin"); //default: admin
+    
+    // state for dark mode // default: Light Mode
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    
     // store all input values from the form
     const [formData, setFormData] = useState({
         fullName: "",
         flatNumber: "",
         email: "",
         password: "",
-        confirmPassword: ""
+        confirmPassword: "",
+        role: "admin" // role will be either "admin" or "member"
     });
+
     // Dark mode logic
-    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // update role whenever role changes
+    useEffect(() => {
+        setFormData(prev => ({ ...prev, role: activeTab }));
+    }, [activeTab]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name] : e.target.value });
@@ -25,6 +36,28 @@ const SignupPage = () => {
         setIsDarkMode(!isDarkMode);
         document.documentElement.classList.toggle("dark"); // toggle class on html (if not understand then refer tailwindcss.com and go for Toggling dark mode manually)
     }
+
+    // Submit handler with basic validation
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            alert("Password do not match!");
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const existingUser = users.find(user => user.email === formData.email);
+        if (existingUser) {
+            alert("User with this email alreadt exists.");
+            return;
+        }
+        users.push(formData); // Add new user
+        localStorage.setItem("users", JSON.stringify(users));
+
+        alert(`Signed up as ${formData.role.toUpperCase()}!`);
+    };
+
     return (
         <div className = "min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300">
         {/* Optional Dark Mode toggle button */}
@@ -76,7 +109,7 @@ const SignupPage = () => {
                             name = "fullName"
                             value = {formData.fullName}
                             onChange = {handleChange}
-                            placeholder = "Enter you full name"
+                            placeholder = "Enter your full name"
                             className = "w-full p-2 bg-transparent outline-none text-white placeholder-gray-400"
                     />
                     </div>
@@ -134,11 +167,14 @@ const SignupPage = () => {
                         whileHover = {{ scale: 1.05 }}
                         className = "flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                     >
-                        <FaSignInAlt className = ""/> Sign Up
+                        <FaSignInAlt /> Sign Up as {formData.role === "admin" ? "Admin" : "Member"}
                     </motion.button>
 
                     <p className = "text-center text-sm text-gray-300 mt-4">
-                        Already have an account? <span className = "text-blue-400 cursor-pointer">Sign in</span>
+                        Already have an account?{" "}
+                        <Link
+                            className = "text-blue-400 cursor-pointer hover:underline inline"
+                            to = "/">Sign in</Link>
                     </p>
         </form>
         </div>
