@@ -40,10 +40,7 @@ const LoginPage = () => {
 
     return (
         // Page fade-in animation
-        <motion.div 
-            initial = {{ opacity: 0 }}
-            animate = {{ opacity: 1 }}
-            transition = {{ duration: 0.3 }}
+        <div 
             className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300">
                 
                 {/* Dark mode toggle button with hover animation */}
@@ -138,7 +135,7 @@ const LoginPage = () => {
                         </Link>
                     </p>
                 </motion.form>
-        </motion.div>
+        </div>
     );
 };
 

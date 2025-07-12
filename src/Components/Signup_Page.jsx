@@ -68,7 +68,8 @@ const SignupPage = () => {
                 className = "absolute top-4 right-4 px-4 py-2 bg-transparent  dark:bg-gray-700 text-gray-800 dark:text-white rounded"
             >{isDarkMode ? "🔆 Light Mode" : "🌙 Dark Mode"}
             </motion.button>
-            <form className = "bg-[#1e293b] text-white p-8 rounded-xl shadow-xl w-full max-w-md">
+            <form className = "bg-[#1e293b] text-white p-8 rounded-xl shadow-xl w-full max-w-md"
+                onSubmit = {handleSubmit}>
                     <h1 className= "text-2xl font-bold text-center mb-2">FlatMate</h1>
                     <p className = "text-center mb-6 text-sm text-gray-300">
                         Manage your society maintenance with ease
@@ -154,7 +155,7 @@ const SignupPage = () => {
                         <FaLock className = "text-gray-400"/>
                         <input 
                             type = "password"
-                            name = "password"
+                            name = "confirmPassword"
                             placeholder = "Confirm your password"
                             onChange = {handleChange}
                             value = {formData.confirmPassword}
