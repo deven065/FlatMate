@@ -1,13 +1,12 @@
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getDatabase, ref, get } from 'firebase/database';
 import { useState } from 'react';
 import { FaEnvelope, FaLock, FaSignInAlt, FaUser, FaUserShield } from 'react-icons/fa';
 import { motion } from "framer-motion";
 import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
-    const [loginData, setLoginData] = useState({
-        email: '',
-        password: ''
-    });
+    const [loginData, setLoginData] = useState({email: '', password: ''});
 
     const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -20,19 +19,43 @@ const LoginPage = () => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
     };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const auth = getAuth();
+        const db = getDatabase();
 
-        const userExists = users.find(user =>
-            user.email === loginData.email && user.password === loginData.password
-        );
+        try {
+            const userCredential = await signInWithEmailAndPassword(
+                auth,
+                loginData.email,
+                loginData.password
+            );
 
-        if (userExists) {
-            alert("Login successful!");
-            // Redirect to dashboard or homepage
-        } else {
-            alert("Invalid email or password.");
+            const user = userCredential.user;
+            // Fetch user role from realtime database
+            const roleRef = ref(db, `users/${user.uid}/role`);
+            const snapshot = await get(roleRef);
+
+            if (snapshot.exists()) {
+                const roleInDB = snapshot.val();
+                if (roleInDB !== activeTab) {
+                    alert(`You are not authorized to login as ${activeTab}.`);
+                    return;
+                }
+
+                alert(`Login successful as ${roleInDB}`);
+            } else {
+                alert("Role not found for user.");
+            }
+            // Redirect or navigate to dashboard here
+        } catch (error) {
+            if (error.code === "auth/user-not-found") {
+                alert("No user found with this email");
+            } else if(error.code === "auth/wrong-password") {
+                alert("Incorrect password");
+            } else {
+                alert(error.message);
+            }
         }
     };
 

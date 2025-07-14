@@ -10,6 +10,7 @@ function App() {
       <Routes>
         <Route path = "/" element = {<LoginPage />} />
         <Route path = "/signup" element = {<SignupPage />} />
+        {/* <button onClick = {putData}>Put Data</button> */}
       </Routes>
       </Fragment>
   )

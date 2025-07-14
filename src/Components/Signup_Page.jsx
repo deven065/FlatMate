@@ -1,5 +1,8 @@
-// I am creating this SignUp page specifically for Admin of the scoiety
-import React, { useState, useEffect } from 'react';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getDatabase ,ref, set } from "firebase/database";
+import { db } from '../firebase';
+import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect } from 'react';
 import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
 import { motion } from "framer-motion"
 import { Link } from 'react-router-dom';
@@ -38,7 +41,7 @@ const SignupPage = () => {
     }
 
     // Submit handler with basic validation
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
         if (formData.password !== formData.confirmPassword) {
@@ -46,16 +49,37 @@ const SignupPage = () => {
             return;
         }
 
-        const users = JSON.parse(localStorage.getItem("users")) || [];
-        const existingUser = users.find(user => user.email === formData.email);
-        if (existingUser) {
-            alert("User with this email alreadt exists.");
-            return;
-        }
-        users.push(formData); // Add new user
-        localStorage.setItem("users", JSON.stringify(users));
+        // FIREBASE AUTHENTICATION
+        const auth = getAuth();
+        try {
+            // Create user in firebase auth
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                formData.email,
+                formData.password
+            );
+            
+            const user = userCredential.user;
+            // FIREBASE Database testing
+            const userId = user.uid;
 
-        alert(`Signed up as ${formData.role.toUpperCase()}!`);
+            await set(ref(db, `users/${userId}`), {
+                fullName: formData.fullName,
+                flatNumber: formData.flatNumber,
+                email: formData.email,
+                password: formData.password,
+                role: formData.role
+            });
+
+            alert(`Signed up successfully as ${formData.role.toUpperCase()}`);
+        } catch (error) {
+            // Handle duplicate email error
+            if (error.code === "auth/email-already-in-use") {
+                alert("User already exists with this email.");
+            } else {
+                alert(error.message); // fallback for other errors
+            }
+        }
     };
 
     return (
