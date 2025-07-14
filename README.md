@@ -66,3 +66,7 @@ The app will run at: http://localhost:3000/
 ```bash
 npm install framer-motion
 ```
+### 9. If any problem is related to Database or Authentication run :
+```bash
+npm install firebase
+```
