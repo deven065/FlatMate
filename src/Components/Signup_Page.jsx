@@ -62,6 +62,25 @@ const SignupPage = () => {
             // FIREBASE Database testing
             const userId = user.uid;
 
+            const userRef = ref(db, `users/${userId}`);
+            const snapshot = await get(userRef);
+
+            const userData = {
+                fullName: formData.fullName,
+                flatNumber: formData.flatNumber,
+                email: formData.email,
+                role: formData.role
+            }
+
+            if(snapshot.exists()){
+                await update(userRef, userData);
+                alert("User data updated successfully.");
+            } else {
+                await set(userRef, userData);
+                alert("signed up successfully as ${formDate.role.toUpperCase()}");
+            }
+
+
             await update(ref(db, `users/${userId}`), {
                 fullName: formData.fullName,
                 flatNumber: formData.flatNumber,
