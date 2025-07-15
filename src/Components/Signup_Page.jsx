@@ -1,7 +1,6 @@
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getDatabase ,ref, set } from "firebase/database";
 import { db } from '../firebase';
-import { v4 as uuidv4 } from 'uuid';
 import { useState, useEffect } from 'react';
 import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
 import { motion } from "framer-motion"
@@ -10,10 +9,10 @@ import { Link } from 'react-router-dom';
 const SignupPage = () => {
     // keeps track of whether the user is signing up as member or admin
     const [activeTab, setActiveTab] = useState("admin"); //default: admin
-    
+
     // state for dark mode // default: Light Mode
     const [isDarkMode, setIsDarkMode] = useState(false);
-    
+
     // store all input values from the form
     const [formData, setFormData] = useState({
         fullName: "",
@@ -58,12 +57,12 @@ const SignupPage = () => {
                 formData.email,
                 formData.password
             );
-            
+
             const user = userCredential.user;
             // FIREBASE Database testing
             const userId = user.uid;
 
-            await set(ref(db, `users/${userId}`), {
+            await update(ref(db, `users/${userId}`), {
                 fullName: formData.fullName,
                 flatNumber: formData.flatNumber,
                 email: formData.email,
@@ -98,7 +97,7 @@ const SignupPage = () => {
                     <p className = "text-center mb-6 text-sm text-gray-300">
                         Manage your society maintenance with ease
                     </p>
-                    
+
                     {/* Toggle Tabs */}
                     <div className = "flex justify-between mb-6">
                         <motion.button
@@ -129,7 +128,7 @@ const SignupPage = () => {
                     <label className = "block text-sm mb-1">Full Name</label>
                     <div className = "flex items-center bg-gray-700 mb-4 rounded-md px-2">
                         <FaUser className = "text-gray-400" />
-                        <input 
+                        <input
                             type = "text"
                             name = "fullName"
                             value = {formData.fullName}
@@ -141,7 +140,7 @@ const SignupPage = () => {
                     <label className = "block text-sm mb-1">Flat/House Number</label>
                     <div className = "flex items-center bg-gray-700 mb-4 rounded-md px-2">
                         <FaHome  className = "text-gray-400"/>
-                        <input 
+                        <input
                             type = "text"
                             name = "flatNumber"
                             placeholder = "Enter your flat /house number"
@@ -153,7 +152,7 @@ const SignupPage = () => {
                     <label className = "block text-sm mb-1">Email Address</label>
                     <div className = "flex items-center bg-gray-700 mb-4 rounded-md px-2">
                         <FaEnvelope  className = "text-gray-400"/>
-                        <input 
+                        <input
                         type = "email"
                         name = "email"
                         placeholder = "Type your email"
@@ -165,7 +164,7 @@ const SignupPage = () => {
                     <label className = "block text-sm mb-1">Password</label>
                     <div className = "flex items-center bg-gray-700 mb-4 rounded-md px-2">
                         <FaLock className = "text-gray-400"/>
-                        <input 
+                        <input
                             type = "password"
                             name = "password"
                             placeholder = "Create your password"
@@ -177,7 +176,7 @@ const SignupPage = () => {
                     <label className = "block text-sm mb-1">Confirm Password</label>
                     <div className = "flex items-center bg-gray-700 mb-6 rounded-md px-2">
                         <FaLock className = "text-gray-400"/>
-                        <input 
+                        <input
                             type = "password"
                             name = "confirmPassword"
                             placeholder = "Confirm your password"
@@ -187,7 +186,7 @@ const SignupPage = () => {
                         />
                     </div>
 
-                    <motion.button 
+                    <motion.button
                         type = "submit"
                         whileHover = {{ scale: 1.05 }}
                         className = "flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
