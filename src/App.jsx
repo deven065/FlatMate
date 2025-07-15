@@ -1,8 +1,11 @@
-import { useState, Fragment } from 'react'
 import './App.css'
 import { Routes, Route } from "react-router-dom";
 import SignupPage from './Components/Signup_Page'
 import LoginPage from './Components/Login_Page'
+import ProtectedRoute from './Components/Admin/ProtectedRoute'
+import AdminDashboard from './Components/Admin/AdminDashboard';
+import MemberDashboard from './Components/Member/MemberDashboard'
+import { Fragment } from 'react';
 
 function App() {
   return (
@@ -10,7 +13,24 @@ function App() {
       <Routes>
         <Route path = "/" element = {<LoginPage />} />
         <Route path = "/signup" element = {<SignupPage />} />
-        {/* <button onClick = {putData}>Put Data</button> */}
+
+        {/* Role based routes */}
+        <Route
+            path = "/admin"
+            element = {
+              <ProtectedRoute requiredRole = "admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+        />
+        <Route 
+          path = "/member"
+          element = {
+            <ProtectedRoute>
+              <MemberDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       </Fragment>
   )

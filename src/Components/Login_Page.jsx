@@ -3,7 +3,7 @@ import { getDatabase, ref, get } from 'firebase/database';
 import { useState } from 'react';
 import { FaEnvelope, FaLock, FaSignInAlt, FaUser, FaUserShield } from 'react-icons/fa';
 import { motion } from "framer-motion";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
     const [loginData, setLoginData] = useState({email: '', password: ''});
