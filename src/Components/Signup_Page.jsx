@@ -71,13 +71,24 @@ const SignupPage = () => {
                 email: formData.email,
                 role: formData.role
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8cddfc1f8ee75e8a7220e995a4433c0589477042
             if(snapshot.exists()){
                 await update(userRef, userData);
                 alert("User data updated successfully.");
             } else {
                 await set(userRef, userData);
+<<<<<<< HEAD
                 alert(`Signed up successfully as ${formData.role.toUpperCase()}`);
             }
+=======
+                alert("signed up successfully as ${formDate.role.toUpperCase()}");
+            }
+
+
+>>>>>>> 8cddfc1f8ee75e8a7220e995a4433c0589477042
             await update(ref(db, `users/${userId}`), {
                 fullName: formData.fullName,
                 flatNumber: formData.flatNumber,
