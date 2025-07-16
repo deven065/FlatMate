@@ -1,11 +1,14 @@
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getDatabase, ref, get } from 'firebase/database';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaEnvelope, FaLock, FaSignInAlt, FaUser, FaUserShield } from 'react-icons/fa';
 import { motion } from "framer-motion";
 import { Link, useNavigate } from 'react-router-dom';
+import { auth, db } from '../firebase';
 
 const LoginPage = () => {
+    const navigate = useNavigate();
+    
     const [loginData, setLoginData] = useState({email: '', password: ''});
 
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -21,41 +24,21 @@ const LoginPage = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const auth = getAuth();
-        const db = getDatabase();
-
         try {
-            const userCredential = await signInWithEmailAndPassword(
-                auth,
-                loginData.email,
-                loginData.password
-            );
+            const userCredential = await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
+            const uid = userCredential.user.uid;
 
-            const user = userCredential.user;
-            // Fetch user role from realtime database
-            const roleRef = ref(db, `users/${user.uid}/role`);
-            const snapshot = await get(roleRef);
+            const roleSnap = await get(ref(db, `users/${uid}/role`));
+            const role = roleSnap.val();
 
-            if (snapshot.exists()) {
-                const roleInDB = snapshot.val();
-                if (roleInDB !== activeTab) {
-                    alert(`You are not authorized to login as ${activeTab}.`);
-                    return;
-                }
+            if (!role) throw new Error("No role set in database");
 
-                alert(`Login successful as ${roleInDB}`);
-            } else {
-                alert("Role not found for user.");
-            }
-            // Redirect or navigate to dashboard here
+            localStorage.setItem("role", role);
+            setActiveTab("AdminDashboard"); // or MemberDashboard based on role
+
+            navigate(role === "admin" ? "/admin" : "/member");
         } catch (error) {
-            if (error.code === "auth/user-not-found") {
-                alert("No user found with this email");
-            } else if(error.code === "auth/wrong-password") {
-                alert("Incorrect password");
-            } else {
-                alert(error.message);
-            }
+            alert("Login failed: " + error.message);
         }
     };
 
