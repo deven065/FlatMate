@@ -4,8 +4,8 @@ import { db } from "../../firebase";
 import { ref, onValue } from "firebase/database";
 
 const StatCard = ({ icon, label, value, color }) => (
-    <div className={`flex items-center gap-4 p-4 rounded-lg bg-[#1f2937] text-white shadow-md w-full max-w-[220px]`}>
-        <div className={`texy-2xl ${color}`}>{icon}</div>
+    <div className={`flex items-center gap-4 p-4 rounded-lg bg-[#1f2937] text-white shadow-md w-[230px]`}>
+        <div className={`text-2xl ${color}`}>{icon}</div>
         <div>
             <div className="text-sm text-gray-400">{label}</div>
             <div className="text-xl font-bold">{value}</div>
@@ -53,7 +53,7 @@ export default function DashboardStats() {
     }, []);
 
     return (
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-row justify-between gap-4 w-full flex-wrap xl:flex-nowrap">
         <StatCard
             icon={<FaUsers />}
             label="Total Members"

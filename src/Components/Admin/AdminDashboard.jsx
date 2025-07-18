@@ -7,6 +7,8 @@ import MemberTable from './MemberTable';
 import RecentPayments from './RecentPayments';
 import MaintenanceConfigForm from './MaintenanceConfigForm';
 import DashboardStats from './DashboardStats';
+import QuickActions from './QuickActions';
+import Header from './Header';
 
 const AdminDashboard = () => {
     const [adminName, setAdminName] = useState('');
@@ -55,60 +57,26 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-gray-800 dark:text-white">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Welcome, {adminName} 👋</h1>
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded shadow-md transition"
-                >
-                    <FaSignOutAlt /> Logout
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Placeholder Cards */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center gap-4 hover:shadow-lg transition">
-                    <FaUsers className="text-3xl text-blue-500" />
-                    <div>
-                        <h2 className="text-lg font-semibold">Manage Members</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Add, remove or update member details</p>
-                    </div>
+        <div>
+            <div className='p-6 bg-[#111827] text-white min-h-screen'>
+                <Header />
+                <div className='flex flex-wrap gap-4 mb-6'>
+                    <DashboardStats />
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center gap-4 hover:shadow-lg transition">
-                    <FaMoneyBill className="text-3xl text-green-500" />
-                    <div>
-                        <h2 className="text-lg font-semibold">Maintenance Fees</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Track and manage monthly fees</p>
+                {/* Main Section */}
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                    <div className='col-span-2 space-y-4'>
+                        <MemberTable />
+                        <RecentPayments />
                     </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center gap-4 hover:shadow-lg transition">
-                    <FaChartPie className="text-3xl text-purple-500" />
-                    <div>
-                        <h2 className="text-lg font-semibold">Reports</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">View income/expense statistics</p>
+                    <div className='space-y-4'>
+                        <MaintenanceConfigForm />
+                        <QuickActions />
                     </div>
                 </div>
             </div>
 
-            <br />
-
-            <DashboardStats />
-
-            <br />
-
-            <MemberTable />
-            <br />
-            <RecentPayments />
-
-            <br />
-            <MaintenanceConfigForm />
-
-            <div className="mt-10 text-center">
-                <p className="text-sm text-gray-400">Powered by Deven Rikame 🚀</p>
-            </div>
         </div>
     );
 };
