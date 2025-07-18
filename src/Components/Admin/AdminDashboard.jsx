@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, get } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import { FaUsers, FaMoneyBill, FaChartPie, FaSignOutAlt, FaTools } from 'react-icons/fa';
+
 import MemberTable from './MemberTable';
 import RecentPayments from './RecentPayments';
 import MaintenanceConfigForm from './MaintenanceConfigForm';
 import DashboardStats from './DashboardStats';
 import QuickActions from './QuickActions';
 import Header from './Header';
+import SystemStatus from './SystemStatus';
+import Footer from './Footer';
 
 const AdminDashboard = () => {
     const [adminName, setAdminName] = useState('');
@@ -43,11 +45,6 @@ const AdminDashboard = () => {
         return () => unsubscribe();
     }, []);
 
-    const handleLogout = async () => {
-        await signOut(auth);
-        navigate('/');
-    };
-
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
@@ -57,26 +54,37 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div>
-            <div className='p-6 bg-[#111827] text-white min-h-screen'>
+        <div className="h-screen flex flex-col bg-white text-gray-900 dark:bg-[#111827] dark:text-white">
+            {/* Fixed Header */}
+            <header className="fixed top-0 w-full z-50 bg-white dark:bg-[#111827] shadow-md">
                 <Header />
-                <div className='flex flex-wrap gap-4 mb-6'>
-                    <DashboardStats />
-                </div>
+            </header>
 
-                {/* Main Section */}
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                    <div className='col-span-2 space-y-4'>
-                        <MemberTable />
-                        <RecentPayments />
+            {/* Scrollable Main Content */}
+            <main className="flex-1 overflow-y-auto mt-[70px] mb-[60px] px-6 py-4">
+                <div className="max-w-screen-xl mx-auto">
+                    <div className='flex flex-wrap gap-4 mb-6 justify-center'>
+                        <DashboardStats />
                     </div>
-                    <div className='space-y-4'>
-                        <MaintenanceConfigForm />
-                        <QuickActions />
+
+                    <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                        <div className='col-span-2 space-y-6'>
+                            <MemberTable />
+                            <RecentPayments />
+                        </div>
+                        <div className='space-y-4'>
+                            <MaintenanceConfigForm />
+                            <QuickActions />
+                            <SystemStatus />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
 
+            {/* Fixed Footer */}
+            <footer className="fixed bottom-0 w-full z-50 bg-white dark:bg-[#111827]">
+                <Footer />
+            </footer>
         </div>
     );
 };

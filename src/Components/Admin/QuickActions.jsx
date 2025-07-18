@@ -1,4 +1,10 @@
-import { FaFileInvoice, FaReceipt, FaBell, FaFileUpload, FaExclamationTriangle } from "react-icons/fa";
+import {
+    FaFileInvoice,
+    FaReceipt,
+    FaBell,
+    FaFileUpload,
+    FaExclamationTriangle,
+} from "react-icons/fa";
 
 const quickActions = [
     {
@@ -28,24 +34,22 @@ const quickActions = [
     },
 ];
 
-const QuickActions = () => {
+export default function QuickActions() {
     return (
-        <div className="bg-[#101828] p-4 rounded-lg shadow-md w-full max-w-xs">
-        <h2 className="text-white font-semibold text-lg mb-4">Quick Actions</h2>
-        <div className="space-y-3">
-            {quickActions.map((action, index) => (
-            <button
-                key={index}
-                className={`w-full text-white font-medium flex items-center justify-between px-4 py-2 rounded-md transition ${action.color}`}
-                onClick={() => console.log(`${action.label} clicked`)} // Replace with real function
-            >
-                <span className="flex items-center gap-2">{action.icon} {action.label}</span>
-                <span className="text-lg">›</span>
-            </button>
-            ))}
-        </div>
+        <div className="bg-white dark:bg-[#101828] p-4 rounded-lg shadow-md w-full max-w-xs">
+            <h2 className="text-gray-800 dark:text-white font-semibold text-lg mb-4">Quick Actions</h2>
+            <div className="space-y-3">
+                {quickActions.map((action, index) => (
+                    <button
+                        key={index}
+                        className={`w-full text-white font-medium flex items-center justify-between px-4 py-2 rounded-md transition ${action.color}`}
+                        onClick={() => console.log(`${action.label} clicked`)}
+                    >
+                        <span className="flex items-center gap-2">{action.icon} {action.label}</span>
+                        <span className="text-lg">›</span>
+                    </button>
+                ))}
+            </div>
         </div>
     );
-};
-
-export default QuickActions;
+}

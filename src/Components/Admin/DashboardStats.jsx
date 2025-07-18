@@ -4,10 +4,10 @@ import { db } from "../../firebase";
 import { ref, onValue } from "firebase/database";
 
 const StatCard = ({ icon, label, value, color }) => (
-    <div className={`flex items-center gap-4 p-4 rounded-lg bg-[#1f2937] text-white shadow-md w-[230px]`}>
-        <div className={`text-2xl ${color}`}>{icon}</div>
+<div className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-[#1f2937] text-gray-800 dark:text-white shadow-md w-full">
+    <div className={`text-2xl ${color}`}>{icon}</div>
         <div>
-            <div className="text-sm text-gray-400">{label}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
             <div className="text-xl font-bold">{value}</div>
         </div>
     </div>
@@ -22,31 +22,33 @@ export default function DashboardStats() {
     });
 
     useEffect(() => {
-        const membersRef = ref(db, "members");
+        const usersRef = ref(db, "users");
         const queriesRef = ref(db, "queries");
 
-        onValue(membersRef, (snapshot) => {
-        let members = snapshot.val();
+        onValue(usersRef, (snapshot) => {
+        const users = snapshot.val() || {};
         let totalMembers = 0;
         let totalCollected = 0;
         let totalDues = 0;
 
-        for (let id in members) {
+        Object.values(users).forEach((user) => {
+            if (user.role === "member") {
             totalMembers++;
-            totalCollected += Number(members[id].paid || 0);
-            totalDues += Number(members[id].dues || 0);
-        }
+            totalCollected += Number(user.paid || 0);
+            totalDues += Number(user.dues || 0);
+            }
+        });
 
         setStats((prev) => ({ ...prev, totalMembers, totalCollected, totalDues }));
         });
 
         onValue(queriesRef, (snapshot) => {
-        let data = snapshot.val();
+        const data = snapshot.val() || {};
         let openQueries = 0;
 
-        for (let id in data) {
-            if (data[id].status === "open") openQueries++;
-        }
+        Object.values(data).forEach((query) => {
+            if (query.status === "open") openQueries++;
+        });
 
         setStats((prev) => ({ ...prev, openQueries }));
         });
@@ -54,30 +56,10 @@ export default function DashboardStats() {
 
     return (
         <div className="flex flex-row justify-between gap-4 w-full flex-wrap xl:flex-nowrap">
-        <StatCard
-            icon={<FaUsers />}
-            label="Total Members"
-            value={stats.totalMembers}
-            color="text-blue-500"
-        />
-        <StatCard
-            icon={<FaMoneyBillWave />}
-            label="Total Collected"
-            value={`₹${stats.totalCollected.toLocaleString()}`}
-            color="text-green-500"
-        />
-        <StatCard
-            icon={<FaExclamationCircle />}
-            label="Outstanding Dues"
-            value={`₹${stats.totalDues.toLocaleString()}`}
-            color="text-red-500"
-        />
-        <StatCard
-            icon={<FaQuestionCircle />}
-            label="Open Queries"
-            value={stats.openQueries}
-            color="text-yellow-500"
-        />
+        <StatCard icon={<FaUsers />} label="Total Members" value={stats.totalMembers} color="text-blue-500" />
+        <StatCard icon={<FaMoneyBillWave />} label="Total Collected" value={`₹${stats.totalCollected.toLocaleString()}`} color="text-green-500" />
+        <StatCard icon={<FaExclamationCircle />} label="Outstanding Dues" value={`₹${stats.totalDues.toLocaleString()}`} color="text-red-500" />
+        <StatCard icon={<FaQuestionCircle />} label="Open Queries" value={stats.openQueries} color="text-yellow-500" />
         </div>
-    );
+);
 }
