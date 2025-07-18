@@ -6,6 +6,7 @@ import { FaUsers, FaMoneyBill, FaChartPie, FaSignOutAlt, FaTools } from 'react-i
 import MemberTable from './MemberTable';
 import RecentPayments from './RecentPayments';
 import MaintenanceConfigForm from './MaintenanceConfigForm';
+import DashboardStats from './DashboardStats';
 
 const AdminDashboard = () => {
     const [adminName, setAdminName] = useState('');
@@ -91,6 +92,10 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            <br />
+
+            <DashboardStats />
 
             <br />
 
