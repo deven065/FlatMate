@@ -32,16 +32,16 @@ function MemberTable() {
 
             {/* Search + Filter */}
             <div className="flex sm:flex-col flex-row justify-between gap-2 mb-4">
-                <input 
+                <input
                     text="text"
                     placeholder="Search members..."
                     className="bg-[#374151] text-white px-4 py-2 rounded w-full sm:w-1/2 outline-none"
                 />
                 <div className="flex gap-2 justify-end">
-                    <button className="bg-[#374151] px-3 py-2 rounded text-sm flex items-center gap-2">
+                    <button className="bg-[#374151] px-3 py-2 rounded text-sm flex items-center gap-2 hover:bg-[#4b5563]">
                         <FaFilter /> Filter
                     </button>
-                    <button className="bg-[#374151] px-3 py-2 rounded text-sm flex items-center gap-2">
+                    <button className="bg-[#374151] px-3 py-2 rounded text-sm flex items-center gap-2 hover:bg-[#4b5563]">
                         <FaFileExport /> Export
                     </button>
                 </div>
