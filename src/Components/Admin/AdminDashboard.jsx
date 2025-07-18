@@ -3,6 +3,7 @@ import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, get } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import { FaUsers, FaMoneyBill, FaChartPie, FaSignOutAlt, FaTools } from 'react-icons/fa';
+import MemberTable from './MemberTable';
 
 const AdminDashboard = () => {
     const [adminName, setAdminName] = useState('');
@@ -88,6 +89,10 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            <br />
+
+            <MemberTable />
 
             <div className="mt-10 text-center">
                 <p className="text-sm text-gray-400">Powered by Deven Rikame 🚀</p>
