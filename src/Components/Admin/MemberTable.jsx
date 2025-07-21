@@ -167,8 +167,6 @@ function MemberTable() {
   setEditId(null);
 };
 
-
-
   const handleDelete = (member) => {
     remove(ref(db, `${member.source}/${member.id}`));
   };
@@ -179,9 +177,9 @@ function MemberTable() {
         <h2 className="text-lg font-semibold">Member Management</h2>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700"
-          onClick={() => setShowForm(true)}
+          onClick={() => setShowForm(prev => !prev)}
         >
-          <FaPlus /> Add Member
+          <FaPlus /> {showForm ? "Close" : "Add Member"}
         </button>
       </div>
 
