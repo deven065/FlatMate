@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { ref, onValue } from "firebase/database";
 import { FaDownload, FaEye } from "react-icons/fa";
+import jsPDF from "jspdf";
 
 export default function RecentPayments() {
     const [payments, setPayments] = useState([]);
@@ -23,6 +24,26 @@ export default function RecentPayments() {
             }
         });
     }, []);
+
+    const handleDownload = (payment) => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text("FlatMate Maintenance Receipt", 20, 20);
+
+        doc.setFontSize(12);
+        doc.text(`Receipt No: ${payment.receipt}`, 20, 40);
+        doc.text(`Date: ${payment.date}`, 20, 48);
+        doc.text(`Member: ${payment.member}`, 20, 56);
+        doc.text(`Flat No: ${payment.flat}`, 20, 64);
+        doc.text(`Email: ${payment.email || "N/A"}`, 20, 72);
+        doc.text(`Amount Paid: ₹${payment.amount}`, 20, 80);
+
+        doc.setFontSize(10);
+        doc.text("Thank you for your payment!", 20, 100);
+
+        doc.save(`receipt-${payment.receipt}.pdf`);
+    };
+
 
     return (
         <div className="bg-white dark:bg-[#1f2937] rounded-lg shadow p-4 text-gray-900 dark:text-white">
@@ -49,7 +70,11 @@ export default function RecentPayments() {
                                 <td className="p-2">{p.receipt}</td>
                                 <td className="p-2 flex gap-3">
                                     <FaEye className="cursor-pointer hover:text-blue-600" title="View" />
-                                    <FaDownload className="cursor-pointer hover:text-blue-600" title="Download" />
+                                    <FaDownload
+                                        className="cursor-pointer hover:text-blue-600"
+                                        title="Download"
+                                        onClick={() => handleDownload(p)}
+                                    />
                                 </td>
                             </tr>
                         ))}

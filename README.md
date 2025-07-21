@@ -70,3 +70,7 @@ npm install framer-motion
 ```bash
 npm install firebase
 ```
+### 10. To enable "Download receipt as PDF" I am using jspdf and jspdf-autotable libraries to generate and download a simple receipt
+```bash
+npm install jspdf jspdf-autotable
+```
