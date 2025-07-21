@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { db } from "../../firebase";
-import { update, ref } from "firebase/database";
+import { update, ref, get } from "firebase/database";
 import { FaSave } from "react-icons/fa";
 
 export default function MaintenanceConfigForm() {
@@ -21,10 +21,42 @@ export default function MaintenanceConfigForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const memberId = "admin"; // ← Change as needed
-        const memberRef = ref(db, `members/${memberId}/maintenanceConfig`);
-        await update(memberRef, formData);
-        alert("Maintenance configuration saved successfully!");
+
+        // 1. Save maintenance config under "config/maintenance"
+        const configRef = ref(db, "config/maintenance");
+        await update(configRef, formData);
+
+        // 2. Calculate total charge to add to dues
+        const totalAmount = ["maintenanceCharge", "waterCharge", "sinkingFund", "lateFee"]
+            .reduce((sum, key) => sum + parseFloat(formData[key] || 0), 0);
+
+        // 3. Update dues in members node
+        const membersSnap = await get(ref(db, "members"));
+        if (membersSnap.exists()) {
+            const updates = {};
+            const members = membersSnap.val();
+            Object.entries(members).forEach(([id, member]) => {
+                const currentDues = parseFloat(member.dues || 0);
+                updates[`members/${id}/dues`] = currentDues + totalAmount;
+            });
+            await update(ref(db), updates);
+        }
+
+        // 4. Update dues in users node (if needed)
+        const usersSnap = await get(ref(db, "users"));
+        if (usersSnap.exists()) {
+            const updates = {};
+            const users = usersSnap.val();
+            Object.entries(users).forEach(([id, user]) => {
+                if (user.role === "member") {
+                    const currentDues = parseFloat(user.dues || 0);
+                    updates[`users/${id}/dues`] = currentDues + totalAmount;
+                }
+            });
+            await update(ref(db), updates);
+        }
+
+        alert("Maintenance configuration saved and dues updated for all members.");
     };
 
     const fields = [
@@ -51,7 +83,7 @@ export default function MaintenanceConfigForm() {
                         value={formData[field.name]}
                         onChange={handleChange}
                         className="w-full bg-gray-100 dark:bg-[#374151] text-gray-900 dark:text-white px-3 py-2 rounded outline-none"
-                        required
+                        required={field.name !== "dueDate"}
                     />
                 </div>
             ))}

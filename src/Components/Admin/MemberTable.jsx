@@ -127,35 +127,46 @@ function MemberTable() {
   };
 
   const handleSave = (member) => {
+  const oldPaid = parseFloat(member.paid);
+  const currentDues = parseFloat(member.dues);
   const newPaid = parseFloat(editData.paid);
-  const newDues = Math.max(0, parseFloat(editData.dues) - (newPaid - parseFloat(member.paid)));
+
+  const paymentMade = newPaid - oldPaid;
+
+  // If no actual new payment is made, skip
+  if (paymentMade <= 0) {
+    setEditId(null);
+    return;
+  }
+
+  const updatedDues = Math.max(0, currentDues - paymentMade);
 
   const updates = {
     name: editData.name,
     flat: editData.flat,
     email: editData.email,
-    dues: newDues,
     paid: newPaid,
+    dues: updatedDues,
     status: editData.status,
   };
 
   update(ref(db, `${member.source}/${member.id}`), updates);
 
-  // ✅ Push to recentPayments
-  if (newPaid > member.paid) {
-    const paymentRecord = {
-      member: editData.name,
-      flat: editData.flat,
-      email: editData.email,
-      amount: newPaid - member.paid,
-      date: new Date().toISOString().split("T")[0],
-      receipt: `#${Math.floor(Math.random() * 1000000)}`,
-    };
-    push(ref(db, "recentPayments"), paymentRecord);
-  }
+  // Record the new payment in recentPayments
+  const paymentRecord = {
+    member: editData.name,
+    flat: editData.flat,
+    email: editData.email,
+    amount: paymentMade,
+    date: new Date().toISOString().split("T")[0],
+    receipt: `#${Math.floor(100000 + Math.random() * 900000)}`,
+  };
+
+  push(ref(db, "recentPayments"), paymentRecord);
 
   setEditId(null);
 };
+
 
 
   const handleDelete = (member) => {
