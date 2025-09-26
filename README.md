@@ -74,3 +74,5 @@ npm install firebase
 ```bash
 npm install jspdf jspdf-autotable
 ```
+
+##Other Informations Coming Soon...
