@@ -1,8 +1,8 @@
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { getDatabase, ref, get } from 'firebase/database';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
 import { useState, useEffect } from 'react';
 import { FaEnvelope, FaLock, FaSignInAlt, FaUser, FaUserShield } from 'react-icons/fa';
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 
@@ -73,7 +73,7 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300">
-            <motion.button
+            <Motion.button
                 whileTap={{ scale: 0.95 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={toggleDarkMode}
@@ -81,9 +81,9 @@ const LoginPage = () => {
                 className="absolute top-4 right-4 px-4 py-2 bg-transparent dark:bg-gray-700 text-gray-800 dark:text-white rounded"
             >
                 {isDarkMode ? "🔆 Light Mode" : "🌙 Dark Mode"}
-            </motion.button>
+            </Motion.button>
 
-            <motion.form
+            <Motion.form
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.35, type: "easeOut" }}
@@ -96,7 +96,7 @@ const LoginPage = () => {
                 </p>
 
                 <div className="flex justify-between mb-6">
-                    <motion.button
+                    <Motion.button
                         type="button"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -104,9 +104,9 @@ const LoginPage = () => {
                         onClick={() => setActiveTab("member")}
                     >
                         <FaUser /> Member Login
-                    </motion.button>
+                    </Motion.button>
 
-                    <motion.button
+                    <Motion.button
                         type="button"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -114,7 +114,7 @@ const LoginPage = () => {
                         onClick={() => setActiveTab("admin")}
                     >
                         <FaUserShield className="w-5" /> Admin Login
-                    </motion.button>
+                    </Motion.button>
                 </div>
 
                 <label className="block text-sm mb-1">Email Address</label>
@@ -161,14 +161,14 @@ const LoginPage = () => {
                     </button>
                 </div>
 
-                <motion.button
+                <Motion.button
                     type="submit"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                 >
                     <FaSignInAlt /> Sign In
-                </motion.button>
+                </Motion.button>
 
                 <p className="text-center text-sm text-gray-300 mt-4">
                     Don't have an account?{" "}
@@ -176,7 +176,7 @@ const LoginPage = () => {
                         Sign up now
                     </Link>
                 </p>
-            </motion.form>
+            </Motion.form>
         </div>
     );
 };

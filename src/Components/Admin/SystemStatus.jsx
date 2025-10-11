@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
 import { FaSyncAlt } from 'react-icons/fa';
+import { motion as Motion } from 'framer-motion';
+import { useToast } from '../Toast/useToast';
 
 const SystemStatus = () => {
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchStatus = async () => {
+    const { push } = useToast();
+    const fetchStatus = useCallback(async () => {
         setLoading(true);
         try {
         const db = getDatabase();
@@ -14,21 +17,24 @@ const SystemStatus = () => {
         const snapshot = await get(statusRef);
         if (snapshot.exists()) {
             setStatus(snapshot.val());
+            push({ type: 'success', title: 'Status updated' });
         } else {
             console.warn("systemStatus node does not exist.");
             setStatus(null);
+            push({ type: 'warning', title: 'No status found' });
         }
         } catch (err) {
         console.error("Failed to fetch system status:", err);
         setStatus(null);
+        push({ type: 'error', title: 'Update failed', description: err.message });
         } finally {
         setLoading(false);
         }
-    };
+    }, [push]);
 
     useEffect(() => {
         fetchStatus();
-    }, []);
+    }, [fetchStatus]);
 
     if (loading) {
         return (
@@ -42,12 +48,14 @@ const SystemStatus = () => {
         return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl text-gray-800 dark:text-white shadow text-sm">
             <p className="text-red-500 text-center">⚠️ System status not found.</p>
-            <button
+            <Motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={fetchStatus}
-            className="mt-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 w-full py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium text-gray-800 dark:text-white"
+            className="mt-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 w-full py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium text-gray-800 dark:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             >
             <FaSyncAlt /> Retry
-            </button>
+            </Motion.button>
         </div>
         );
     }
@@ -86,12 +94,14 @@ const SystemStatus = () => {
             <span className="font-medium">{version}</span>
         </p>
 
-        <button
+        <Motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={fetchStatus}
-            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 w-full py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium text-gray-800 dark:text-white"
+            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 w-full py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium text-gray-800 dark:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
         >
             <FaSyncAlt /> Check for Updates
-        </button>
+        </Motion.button>
         </div>
     );
 };

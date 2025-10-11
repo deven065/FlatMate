@@ -1,3 +1,34 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Project custom helpers (kept alongside Tailwind) */
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04) }
+.card-header { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600 }
+.card-body { padding: 16px }
+.btn { display:inline-flex; align-items:center; gap:.5rem; padding:.5rem .75rem; border-radius:.5rem; border:1px solid #e5e7eb; background:#f8fafc; color:#0f172a; font-weight:600 }
+.btn-primary { background:#2563eb; border-color:#2563eb; color:#fff }
+.btn-secondary { background:#eef2ff; border-color:#c7d2fe; color:#3730a3 }
+.input { width:100%; padding:.5rem .75rem; border:1px solid #e5e7eb; border-radius:.5rem; outline:none }
+.badge-success { display:inline-block; padding:.125rem .5rem; border-radius:999px; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:12px }
+.badge-danger { display:inline-block; padding:.125rem .5rem; border-radius:999px; background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:12px }
+.table-wrap { overflow:auto }
+.table { width:100%; border-collapse:collapse }
+.table th { font-weight:600; color:#334155; background:#f1f5f9 }
+.table th,.table td { padding:.5rem .75rem; border-bottom:1px solid #e5e7eb }
+.toast-stack { position: fixed; bottom: 16px; right: 16px; display:flex; flex-direction:column; gap:12px; z-index: 60 }
+.toast { display:flex; gap:.75rem; align-items:center; background:#111827; color:white; padding:.5rem .75rem; border-radius:.5rem; box-shadow:0 10px 20px rgba(0,0,0,.2) }
+.toast.success{ background:#065f46 }
+.toast.error{ background:#991b1b }
+.toast.info{ background:#1f2937 }
+.toast-title{ font-weight:700 }
+.toast-desc{ opacity:.9 }
+.toast-close{ background:transparent; border:0; color:inherit; cursor:pointer; font-size:16px }
+
+/* Dark mode support using class strategy */
+.dark .card { background:#0b1220; border-color:#1e293b }
+.dark .card-header { border-color:#1e293b }
+.dark .btn { background:#0b1220; color:#e5e7eb; border-color:#1e293b }
+.dark .btn-primary { background:#3b82f6; border-color:#3b82f6 }
+.dark .btn-secondary { background:#1f2937; border-color:#334155; color:#bfdbfe }
+.dark .input { background:#0b1220; color:#e5e7eb; border-color:#1e293b }
+.dark .table th { background:#0b1220; color:#e5e7eb }
+.dark .table th,.dark .table td { border-color:#1e293b }

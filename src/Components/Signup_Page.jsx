@@ -3,7 +3,7 @@ import { ref, set, get, update } from "firebase/database";
 import { db } from '../firebase';
 import { useState, useEffect } from 'react';
 import { FaUser, FaUserShield, FaHome, FaEnvelope, FaLock, FaUserPlus, FaSignInAlt } from 'react-icons/fa';
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import { Link } from 'react-router-dom';
 
 const SignupPage = () => {
@@ -98,13 +98,13 @@ const SignupPage = () => {
     return (
         <div className = "min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors duration-300">
         {/* Optional Dark Mode toggle button */}
-            <motion.button
+            <Motion.button
                 onClick = {toggleDarkMode}
                 whileTap = {{ scale: 0.95 }}
                 whileHover = {{ scale: 1.05 }}
                 className = "absolute top-4 right-4 px-4 py-2 bg-transparent  dark:bg-gray-700 text-gray-800 dark:text-white rounded"
             >{isDarkMode ? "🔆 Light Mode" : "🌙 Dark Mode"}
-            </motion.button>
+            </Motion.button>
             <form className = "bg-[#1e293b] text-white p-8 rounded-xl shadow-xl w-full max-w-md"
                 onSubmit = {handleSubmit}>
                     <h1 className= "text-2xl font-bold text-center mb-2">FlatMate</h1>
@@ -114,7 +114,7 @@ const SignupPage = () => {
 
                     {/* Toggle Tabs */}
                     <div className = "flex justify-between mb-6">
-                        <motion.button
+                        <Motion.button
                             type = "button"
                             whileHover = {{ scale: 1.05 }}
                             whileTap = {{ scale: 0.95 }}
@@ -124,8 +124,8 @@ const SignupPage = () => {
                             onClick = {()=> setActiveTab("member")}
                         >
                             <FaUser /> Member Login
-                        </motion.button>
-                        <motion.button
+                        </Motion.button>
+                        <Motion.button
                             type = "button"
                             whileHover = {{ scale: 1.05 }}
                             whileTap = {{ scale: 0.95 }}
@@ -135,7 +135,7 @@ const SignupPage = () => {
                             onClick = {()=> setActiveTab("admin")}
                         >
                             <FaUserShield className = "w-5"/> Admin Login
-                        </motion.button>
+                        </Motion.button>
                     </div>
 
                     {/* Form Inputs */}
@@ -200,13 +200,13 @@ const SignupPage = () => {
                         />
                     </div>
 
-                    <motion.button
+                    <Motion.button
                         type = "submit"
                         whileHover = {{ scale: 1.05 }}
                         className = "flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full py-2 rounded-md font-semibold transition-colors"
                     >
                         <FaSignInAlt /> Sign Up as {formData.role === "admin" ? "Admin" : "Member"}
-                    </motion.button>
+                    </Motion.button>
 
                     <p className = "text-center text-sm text-gray-300 mt-4">
                         Already have an account?{" "}

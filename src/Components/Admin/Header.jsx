@@ -51,7 +51,7 @@ export default function Header() {
         }
 
         return () => unsubscribe();
-    }, []);
+    }, [auth]);
 
     const handleLogout = () => {
         signOut(auth)
@@ -97,7 +97,7 @@ export default function Header() {
                     <Link
                         key={item.label}
                         to={item.path}
-                        className={`flex items-center gap-1 px-2 py-1 rounded 
+                        className={`flex items-center gap-1 px-2 py-1 rounded
                             ${location.pathname === item.path
                                 ? "bg-gray-200 dark:bg-[#374151]"
                                 : "hover:bg-gray-200 dark:hover:bg-[#374151]"

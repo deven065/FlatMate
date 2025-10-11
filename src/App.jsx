@@ -39,7 +39,7 @@ function App() {
     });
 
     return () => unsubscibe();
-  }, []);
+  }, [navigate, location.pathname]);
 
   const handleLogin = async (email, password) => {
     try {
@@ -64,7 +64,7 @@ function App() {
       <Route path="/" element= {<LoginPage onLogin={handleLogin}/>} />
       <Route path="/signup" element={<SignupPage />} />
 
-      <Route 
+      <Route
         path='/admin'
         element= {
           user && role === "admin" ? <AdminDashboard /> : <Navigate to="/" />
