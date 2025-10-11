@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ref, update, push } from "firebase/database";
+import { useEffect, useState } from "react";
+import { ref, update, push, onValue } from "firebase/database";
 import { db } from "../../firebase";
 import { useToast } from "../Toast/useToast";
 
@@ -80,6 +80,29 @@ export default function PayModal({ open, onClose, uid, profile, dues = 0, onSucc
     const [amount, setAmount] = useState(dues ? String(dues) : "");
     const [method, setMethod] = useState("UPI");
     const [submitting, setSubmitting] = useState(false);
+    const [config, setConfig] = useState(null);
+
+    // read maintenance config
+    useEffect(() => {
+        const off = onValue(ref(db, 'config/maintenance'), (snap) => setConfig(snap.val() || null));
+        return () => off();
+    }, []);
+
+    // derive allowance if late fee applies this period
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const period = `${yyyy}-${mm}`;
+    // prefer ISO date if present
+    let dueDay = Number(config?.dueDate);
+    if (config?.dueDateISO) {
+        const d = new Date(config.dueDateISO);
+        if (!isNaN(d)) dueDay = d.getDate();
+    }
+    const isLateNow = Number.isFinite(dueDay) && dueDay >= 1 && dueDay <= 31 ? today.getDate() > dueDay : false;
+    const cfgLateFee = Number(config?.lateFee || 0);
+    const shouldAddLateNow = isLateNow && cfgLateFee > 0 && Number(dues) > 0 && profile?.lateFeeAssessedOn !== period;
+    const allowedMax = Number(dues) + (shouldAddLateNow ? cfgLateFee : 0);
 
     if (!open) return null;
 
@@ -90,8 +113,8 @@ export default function PayModal({ open, onClose, uid, profile, dues = 0, onSucc
         return;
     }
 
-    if (amt > dues) {
-        pushToast({ type: "error", title: "Amount exceeds due", description: `Max payable is ₹${Number(dues).toFixed(2)}` });
+    if (amt > allowedMax) {
+        pushToast({ type: "error", title: "Amount exceeds due", description: `Max payable is ₹${Number(allowedMax).toFixed(2)}` });
         return;
     }
 
@@ -102,22 +125,41 @@ export default function PayModal({ open, onClose, uid, profile, dues = 0, onSucc
 
     setSubmitting(true);
     try {
-        const newDues = Math.max(0, Number(dues) - amt);
-        const newPaid = Number(profile?.paid || 0) + amt;
-        await update(ref(db, `users/${uid}`), { dues: newDues, paid: newPaid });
+        // compute if late fee applies (only once per month period)
+    const isLate = isLateNow;
+    const shouldAddLate = shouldAddLateNow;
+
+    // allocate payment to dues first, then to late fee (if assessed this transaction)
+    let remaining = amt;
+    const currentDues = Number(dues);
+    const afterDues = Math.max(0, currentDues - remaining);
+    remaining = Math.max(0, remaining - currentDues);
+    const feeAssessed = shouldAddLate ? cfgLateFee : 0;
+    const feeRemaining = Math.max(0, feeAssessed - remaining);
+
+    const newPaid = Number(profile?.paid || 0) + amt;
+    const newDues = afterDues + feeRemaining;
+
+    const updates = { dues: newDues, paid: newPaid };
+    if (shouldAddLate) updates.lateFeeAssessedOn = period;
+        // update user dues/paid (+ mark late fee assessed for this period)
+        await update(ref(db, `users/${uid}`), updates);
 
         const record = {
             member: profile?.fullName || profile?.name || "Member",
             flat: profile?.flatNumber || profile?.flat || "",
             email: profile.email,
             amount: amt,
+            lateFeeAddedToDues: shouldAddLate ? cfgLateFee : 0,
+            wasLatePayment: isLate,
             date: new Date().toISOString().split("T")[0],
             receipt: genReceiptId(),
             method,
+            createdAt: Date.now(),
         };
         await push(ref(db, "recentPayments"), record);
 
-        pushToast({ type: "success", title: "Payment successful", description: `Paid ₹${amt.toFixed(2)}` });
+    pushToast({ type: "success", title: "Payment successful", description: `Paid ₹${amt.toFixed(2)}${shouldAddLate ? ` • Late fee of ₹${cfgLateFee.toFixed(2)} added to dues` : ''}` });
         onSuccess?.(record);
         onClose?.();
         } catch (err) {
@@ -135,12 +177,17 @@ export default function PayModal({ open, onClose, uid, profile, dues = 0, onSucc
             <div style={{ marginBottom: 8, color: "#475569" }}>
                 Due: <strong>₹{Number(dues).toFixed(2)}</strong>
             </div>
+                        {shouldAddLateNow && (
+                            <div style={{ marginBottom: 8, fontSize: 12, color: '#b45309', background:'#fffbeb', border:'1px solid #f59e0b', padding:'8px 10px', borderRadius:8 }}>
+                                A late fee of ₹{cfgLateFee.toFixed(2)} will be added this period. Max payable: ₹{Number(allowedMax).toFixed(2)}
+                            </div>
+                        )}
             <div style={rowStyle}>
                 <input
                 style={inputStyle}
                 type="number"
                 min={0}
-                max={Number(dues) || undefined}
+                max={allowedMax || undefined}
                 step="0.01"
                 placeholder="Amount"
                 value={amount}

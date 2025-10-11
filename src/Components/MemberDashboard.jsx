@@ -1,9 +1,5 @@
-import React from 'react'
+import React from 'react';
 
-function MemberDashhboard() {
-    return (
-        <h2>Welcome to Member Dashboard</h2>
-    )
+export default function MemberDashboard() {
+    return <h2>Welcome to Member Dashboard</h2>;
 }
-
-export default MemberDashboard;

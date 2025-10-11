@@ -8,12 +8,12 @@ import RecentPayments from './RecentPayments';
 import MaintenanceConfigForm from './MaintenanceConfigForm';
 import DashboardStats from './DashboardStats';
 import QuickActions from './QuickActions';
+import NoticesManager from './NoticesManager';
 import Header from './Header';
 import SystemStatus from './SystemStatus';
 import Footer from './Footer';
 
 const AdminDashboard = () => {
-    const [adminName, setAdminName] = useState('');
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const auth = getAuth();
@@ -27,7 +27,6 @@ const AdminDashboard = () => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.role === 'admin') {
-                        setAdminName(userData.fullName);
                         setLoading(false);
                     } else {
                         alert('Access denied. Only admins can access this dashboard.');
@@ -43,7 +42,7 @@ const AdminDashboard = () => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [auth, db, navigate]);
 
     if (loading) {
         return (
@@ -75,6 +74,7 @@ const AdminDashboard = () => {
                         <div className='space-y-4'>
                             <MaintenanceConfigForm />
                             <QuickActions />
+                            <NoticesManager />
                             <SystemStatus />
                         </div>
                     </div>

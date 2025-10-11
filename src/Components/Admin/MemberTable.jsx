@@ -33,6 +33,7 @@ function MemberTable() {
   const [payMethod, setPayMethod] = useState("UPI");
   const [paying, setPaying] = useState(false);
   const { push: pushToast } = useToast();
+  const [config, setConfig] = useState(null);
 
   const formatCurrency = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
 
@@ -55,6 +56,13 @@ function MemberTable() {
     });
 
     return () => { unsubscribeMembers(); unsubscribeUsers(); };
+  }, []);
+
+  // Load maintenance config for due date and late fee
+  useEffect(() => {
+    const cfgRef = ref(db, 'config/maintenance');
+    const off = onValue(cfgRef, (snap) => setConfig(snap.val() || null));
+    return () => off();
   }, []);
 
   useEffect(() => {
@@ -172,27 +180,59 @@ function MemberTable() {
   const openPay = (member) => {
     setPayFor(member);
     const pending = Number(member.dues) || 0;
-    setPayAmount(pending);
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const period = `${yyyy}-${mm}`;
+    let dueDay = Number(config?.dueDate);
+    if (config?.dueDateISO) {
+      const d = new Date(config.dueDateISO);
+      if (!isNaN(d)) dueDay = d.getDate();
+    }
+    const isLate = Number.isFinite(dueDay) && dueDay >= 1 && dueDay <= 31 ? today.getDate() > dueDay : false;
+    const lateFee = isLate && pending > 0 && (member?.lateFeeAssessedOn !== period) ? Number(config?.lateFee || 0) : 0;
+    setPayAmount(pending + lateFee);
     setPayMethod("UPI");
   };
 
   const confirmPay = async () => {
     if (!payFor) return;
     const pending = Math.max(0, Number(payFor.dues) || 0);
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const period = `${yyyy}-${mm}`;
+    let dueDay = Number(config?.dueDate);
+    if (config?.dueDateISO) {
+      const d = new Date(config.dueDateISO);
+      if (!isNaN(d)) dueDay = d.getDate();
+    }
+    const isLate = Number.isFinite(dueDay) && dueDay >= 1 && dueDay <= 31 ? today.getDate() > dueDay : false;
+    const cfgLateFee = Number(config?.lateFee || 0);
+    const shouldAddLate = isLate && cfgLateFee > 0 && pending > 0 && payFor?.lateFeeAssessedOn !== period;
+    const allowedMax = pending + (shouldAddLate ? cfgLateFee : 0);
+
     let amount = Number(payAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
       pushToast({ type: 'error', title: 'Enter a valid amount' });
       return;
     }
-    // Cap at pending to avoid negative
-    if (amount > pending) amount = pending;
+    // Cap at allowed maximum (pending + maybe fee) to avoid negative
+    if (amount > allowedMax) amount = allowedMax;
     setPaying(true);
     try {
+      // Allocate amount to dues first, then to newly assessed late fee
+      let remaining = amount;
+      const afterDues = Math.max(0, pending - remaining);
+      remaining = Math.max(0, remaining - pending);
+      const feeAssessed = shouldAddLate ? cfgLateFee : 0;
+      const feeRemaining = Math.max(0, feeAssessed - remaining);
+
       const newPaid = (Number(payFor.paid) || 0) + amount;
-      const newDues = Math.max(0, pending - amount);
-      const updatesMembers = { paid: newPaid, dues: newDues };
-      const updatesUsers = { paid: newPaid, dues: newDues };
-      await update(ref(db, `${payFor.source}/${payFor.id}`), payFor.source === 'users' ? updatesUsers : updatesMembers);
+      const newDues = afterDues + feeRemaining;
+      const common = { paid: newPaid, dues: newDues };
+      if (shouldAddLate) common.lateFeeAssessedOn = period;
+      await update(ref(db, `${payFor.source}/${payFor.id}`), common);
 
       const paymentRecord = {
         member: payFor.name,
@@ -203,6 +243,8 @@ function MemberTable() {
         date: new Date().toISOString().split('T')[0],
         receipt: `#${Math.floor(100000 + Math.random() * 900000)}`,
         createdAt: Date.now(),
+        lateFeeAddedToDues: shouldAddLate ? cfgLateFee : 0,
+        wasLatePayment: isLate,
       };
       await push(ref(db, 'recentPayments'), paymentRecord);
 
@@ -212,7 +254,7 @@ function MemberTable() {
         flatNumber: payFor.flat,
       });
 
-      pushToast({ type: 'success', title: 'Payment received', description: `${payFor.name} paid ${formatCurrency(amount)}` });
+      pushToast({ type: 'success', title: 'Payment received', description: `${payFor.name} paid ${formatCurrency(amount)}${shouldAddLate ? ` • Late fee of ${formatCurrency(cfgLateFee)} added to dues` : ''}` });
       setPayFor(null);
       setPayAmount(0);
     } catch (e) {
@@ -387,25 +429,48 @@ function MemberTable() {
               </button>
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">{payFor.name} • Flat {payFor.flat}</div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="rounded-md bg-gray-100 dark:bg-[#374151] p-3">
-                <div className="text-xs text-gray-500 dark:text-gray-400">Pending</div>
-                <div className="text-base font-semibold text-red-600">{formatCurrency(payFor.dues)}</div>
-              </div>
-              <div className="rounded-md bg-gray-100 dark:bg-[#374151] p-3">
-                <div className="text-xs text-gray-500 dark:text-gray-400">Paid Till Now</div>
-                <div className="text-base font-semibold">{formatCurrency(payFor.paid)}</div>
-              </div>
-            </div>
-            <div className="mb-3">
-              <label className="block text-sm mb-1">Amount</label>
-              <input type="number" className="w-full bg-gray-100 dark:bg-[#374151] px-3 py-2 rounded outline-none" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />
-              <div className="flex gap-2 mt-2">
-                <button type="button" className="px-2.5 py-1.5 text-sm rounded bg-gray-100 dark:bg-[#374151] hover:bg-gray-200 dark:hover:bg-[#4b5563]" onClick={() => setPayAmount(Math.max(0, Number(payFor.dues) || 0))}>Full</button>
-                <button type="button" className="px-2.5 py-1.5 text-sm rounded bg-gray-100 dark:bg-[#374151] hover:bg-gray-200 dark:hover:bg-[#4b5563]" onClick={() => setPayAmount(500)}>₹500</button>
-                <button type="button" className="px-2.5 py-1.5 text-sm rounded bg-gray-100 dark:bg-[#374151] hover:bg-gray-200 dark:hover:bg-[#4b5563]" onClick={() => setPayAmount(1000)}>₹1000</button>
-              </div>
-            </div>
+            {(() => {
+              const pending = Math.max(0, Number(payFor.dues) || 0);
+              const today = new Date();
+              const yyyy = today.getFullYear();
+              const mm = String(today.getMonth() + 1).padStart(2, '0');
+              const period = `${yyyy}-${mm}`;
+              let dueDay = Number(config?.dueDate);
+              if (config?.dueDateISO) {
+                const d = new Date(config.dueDateISO);
+                if (!isNaN(d)) dueDay = d.getDate();
+              }
+              const isLate = Number.isFinite(dueDay) && dueDay >= 1 && dueDay <= 31 ? today.getDate() > dueDay : false;
+              const cfgLateFee = Number(config?.lateFee || 0);
+              const shouldAddLate = isLate && cfgLateFee > 0 && pending > 0 && payFor?.lateFeeAssessedOn !== period;
+              const allowedMax = pending + (shouldAddLate ? cfgLateFee : 0);
+              return (
+                <>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="rounded-md bg-gray-100 dark:bg-[#374151] p-3">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Pending</div>
+                      <div className="text-base font-semibold text-red-600">{formatCurrency(pending)}</div>
+                    </div>
+                    <div className="rounded-md bg-gray-100 dark:bg-[#374151] p-3">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Paid Till Now</div>
+                      <div className="text-base font-semibold">{formatCurrency(payFor.paid)}</div>
+                    </div>
+                  </div>
+                  {shouldAddLate && (
+                    <div className="mb-2 text-xs text-yellow-400">Late fee of {formatCurrency(cfgLateFee)} will be added this period.</div>
+                  )}
+                  <div className="mb-3">
+                    <label className="block text-sm mb-1">Amount</label>
+                    <input type="number" max={allowedMax} className="w-full bg-gray-100 dark:bg-[#374151] px-3 py-2 rounded outline-none" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />
+                    <div className="flex gap-2 mt-2">
+                      <button type="button" className="px-2.5 py-1.5 text-sm rounded bg-gray-100 dark:bg-[#374151] hover:bg-gray-200 dark:hover:bg-[#4b5563]" onClick={() => setPayAmount(allowedMax)}>Full</button>
+                      <button type="button" className="px-2.5 py-1.5 text-sm rounded bg-gray-100 dark:bg-[#374151] hover:bg-gray-200 dark:hover:bg-[#4b5563]" onClick={() => setPayAmount(500)}>₹500</button>
+                      <button type="button" className="px-2.5 py-1.5 text-sm rounded bg-gray-100 dark:bg-[#374151] hover:bg-gray-200 dark:hover:bg-[#4b5563]" onClick={() => setPayAmount(1000)}>₹1000</button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
             <div className="mb-3">
               <label className="block text-sm mb-1">Method</label>
               <select className="w-full bg-gray-100 dark:bg-[#374151] px-3 py-2 rounded outline-none" value={payMethod} onChange={(e) => setPayMethod(e.target.value)}>
