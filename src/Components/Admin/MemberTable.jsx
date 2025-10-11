@@ -140,10 +140,31 @@ function MemberTable() {
       pushToast({ type: 'error', title: 'Invalid Pending amount' });
       return;
     }
-    // Do not change 'paid' here; use Receive Payment for that.
-    const updatesMembers = { name: editData.name, flat: editData.flat, email: editData.email, status: safeStatus, dues: newDues };
-    const updatesUsers = { fullName: editData.name, flatNumber: editData.flat, email: editData.email, status: safeStatus, dues: newDues };
+    // If Pending decreased, treat the difference as a manual payment adjustment.
+    const originalDues = Number(member.dues) || 0;
+    const paymentDelta = originalDues - newDues; // >0 means payment made
+    let updatesMembers = { name: editData.name, flat: editData.flat, email: editData.email, status: safeStatus, dues: newDues };
+    let updatesUsers = { fullName: editData.name, flatNumber: editData.flat, email: editData.email, status: safeStatus, dues: newDues };
+    if (paymentDelta > 0) {
+      const newPaid = (Number(member.paid) || 0) + paymentDelta;
+      updatesMembers.paid = newPaid;
+      updatesUsers.paid = newPaid;
+    }
     update(ref(db, `${member.source}/${member.id}`), member.source === 'users' ? updatesUsers : updatesMembers);
+
+    if (paymentDelta > 0) {
+      const paymentRecord = {
+        member: editData.name,
+        flat: editData.flat,
+        email: editData.email,
+        amount: paymentDelta,
+        method: 'Manual Edit',
+        date: new Date().toISOString().split('T')[0],
+        receipt: `#${Math.floor(100000 + Math.random() * 900000)}`,
+        createdAt: Date.now(),
+      };
+      push(ref(db, 'recentPayments'), paymentRecord);
+    }
     pushToast({ type: 'success', title: 'Member updated', description: 'Pending updated.' });
     setEditId(null);
   };
@@ -181,6 +202,7 @@ function MemberTable() {
         method: payMethod,
         date: new Date().toISOString().split('T')[0],
         receipt: `#${Math.floor(100000 + Math.random() * 900000)}`,
+        createdAt: Date.now(),
       };
       await push(ref(db, 'recentPayments'), paymentRecord);
 
