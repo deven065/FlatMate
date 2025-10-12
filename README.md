@@ -169,11 +169,71 @@ Maintenance Config
 
 ---
 
-## 🔒 Security & Secrets
+## 🔒 Security & App Check
 
 - Never commit .env files or API keys
 - Restrict Realtime Database rules for production (dev rules can be permissive; tighten for prod)
 - Consider role-based checks (admin vs member) in the UI and rules
+
+### Firebase App Check (reCAPTCHA v3)
+
+App Check protects Firebase APIs (Storage, Realtime DB, etc.) by verifying requests come from your app.
+
+1) In Firebase Console → Build → App Check → Register app
+  - Choose your Web App
+  - Provider: reCAPTCHA v3
+  - Copy the Site Key
+  - Add these to `.env.local`:
+
+```env
+VITE_APPCHECK_SITE_KEY=your_recaptcha_v3_site_key
+# Optional for local dev; set to 'true' to generate a random debug token printed in the console
+VITE_APPCHECK_DEBUG_TOKEN=true
+```
+
+2) Domains
+  - Add your local and deployed domains in App Check: e.g. `http://localhost:5173` and your production domain
+
+3) Enforcement
+  - Start in Monitoring mode. After you see verified traffic for Storage/Database, enable Enforcement
+
+4) Code
+  - `src/firebase.js` initializes App Check with `ReCaptchaV3Provider` and auto-refresh. It reads the env vars above.
+
+5) Verify
+  - App Check → APIs table should show some % of Verified requests for Storage/Realtime DB when you use the app
+  - Network tab → look for `x-firebase-appcheck` header in requests
+
+### Storage rules (notices)
+
+For file uploads used by the Admin “Notices” feature, use Storage rules that allow authenticated writes to `notices/` and public reads if required by your use case. Example:
+
+```js
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+   function isSignedIn() { return request.auth != null; }
+   function isNotice() { return request.resource.name.matches('notices/.*'); }
+
+   // Public read of notices; adjust to your needs
+   match /notices/{fileName} {
+    allow read: if true; // or isSignedIn();
+    allow write: if isSignedIn() &&
+      request.resource.size < 5 * 1024 * 1024 &&
+      request.resource.contentType.matches('application/.*|image/.*|text/plain|application/pdf');
+   }
+
+   // Default deny
+   match /{allPaths=**} {
+    allow read, write: if false;
+   }
+  }
+}
+```
+
+If you need admin-only writes, add a custom claim to admin users (e.g., `admin: true`) and change `allow write` to `isSignedIn() && request.auth.token.admin == true && ...`.
+
+Tip: If uploads stall at 0%, validate that App Check is registered and Storage rules permit the path and content-type. Our upload UI will auto-retry once and then surface errors.
 
 ---
 

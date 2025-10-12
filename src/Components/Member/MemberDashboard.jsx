@@ -161,7 +161,7 @@ const MemberDashboard = () => {
         return () => off();
     }, []);
 
-    // Load notices uploaded by admin only
+    // Load notices uploaded by admin only, and filter by audience/flat targeting
     useEffect(() => {
         const noticesRef = ref(db, 'notices');
         const off = onValue(noticesRef, (snap) => {
@@ -171,7 +171,19 @@ const MemberDashboard = () => {
                 .filter((n) => {
                     const byAdmin = String(n.uploadedBy || n.role || '').toLowerCase() === 'admin';
                     const notExpired = !n.expiryAt || Number(n.expiryAt) > Date.now();
-                    return byAdmin && notExpired;
+                    if (!byAdmin || !notExpired) return false;
+                    // Audience rules
+                    const audience = (n.audience || 'all');
+                    if (audience === 'all') return true;
+                    if (audience === 'owners') return String(profile?.role) === 'owner';
+                    if (audience === 'tenants') return String(profile?.role) === 'tenant';
+                    if (audience === 'flats') {
+                        const flats = Array.isArray(n.targetFlats) ? n.targetFlats.map(String) : [];
+                        const myFlat = String(profile?.flatNumber || profile?.flat || '').trim();
+                        if (!myFlat) return false;
+                        return flats.includes(myFlat);
+                    }
+                    return true;
                 })
                 .sort((a, b) => {
                     const ad = a.createdAt || a.date || '';
@@ -181,7 +193,7 @@ const MemberDashboard = () => {
             setNotices(list);
         });
         return () => off();
-    }, []);
+    }, [profile?.flatNumber, profile?.role, profile?.flat]);
 
     const formatNoticeDate = (d) => {
         if (!d) return '';
@@ -380,9 +392,15 @@ const MemberDashboard = () => {
                                                 notices.map((n) => (
                                                     <a key={n.id} href={n.url} target="_blank" rel="noreferrer" download className="flex items-center justify-between rounded-md bg-[#2a3340] px-3 py-2 hover:bg-[#253040]">
                                                         <div className="min-w-0 pr-3">
-                                                            <div className="font-medium text-sm truncate" title={n.title || 'Notice'}>{n.title || 'Notice'}</div>
-                                                            {(n.date || n.createdAt) && (
-                                                                <div className="text-xs text-gray-300">Date: {formatNoticeDate(n.date || n.createdAt)}</div>
+                                                            <div className="font-medium text-sm truncate" title={n.title || 'Notice'}>
+                                                                {n.title || 'Notice'}
+                                                                <span className="ml-2 inline-flex gap-1">
+                                                                    {n.urgent ? <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-600/20 text-red-300 border border-red-700/40">Urgent</span> : null}
+                                                                    {n.important ? <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-600/20 text-amber-300 border border-amber-700/40">Important</span> : null}
+                                                                </span>
+                                                            </div>
+                                                            {(n.noticeDate || n.date || n.createdAt) && (
+                                                                <div className="text-xs text-gray-300">Date: {formatNoticeDate(n.noticeDate || n.date || n.createdAt)}</div>
                                                             )}
                                                             {n.description && (
                                                                 <div className="text-xs text-gray-400 truncate">{n.description}</div>
