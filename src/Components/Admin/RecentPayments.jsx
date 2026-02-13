@@ -9,6 +9,7 @@ import { useToast } from "../Toast/useToast";
 export default function RecentPayments() {
     const { push: pushToast } = useToast();
     const [payments, setPayments] = useState([]);
+    const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     // helper: current week (Mon-Sun)
     const getWeekRange = () => {
@@ -85,6 +86,36 @@ export default function RecentPayments() {
         });
         return () => unsub();
     }, []);
+
+    // Load users to lookup member names
+    useEffect(() => {
+        const usersRef = ref(db, "users");
+        const unsub = onValue(usersRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const usersList = Object.entries(data).map(([id, value]) => ({ id, ...value }));
+                setUsers(usersList);
+            } else {
+                setUsers([]);
+            }
+        });
+        return () => unsub();
+    }, []);
+
+    // Helper function to get member name
+    const getMemberName = (payment) => {
+        if (payment.member && payment.member !== '0') {
+            return payment.member;
+        }
+        // Look up by email
+        if (payment.email) {
+            const user = users.find(u => u.email === payment.email);
+            if (user && user.fullName) {
+                return user.fullName;
+            }
+        }
+        return 'Unknown Member';
+    };
 
     const handleDownload = (payment) => {
         const doc = new jsPDF();
@@ -264,7 +295,7 @@ export default function RecentPayments() {
                         <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                                 <div className="font-semibold truncate flex items-center">
-                                    <span className="truncate">{p.member}</span>
+                                    <span className="truncate">{getMemberName(p)}</span>
                                     <LateBadge p={p} />
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400 truncate">Flat {p.flat} • {formatDateTime(p)}</div>
@@ -305,8 +336,8 @@ export default function RecentPayments() {
                         {paged.map((p, idx) => (
                             <tr key={p.id} className={`border-t border-gray-300 dark:border-gray-700 ${idx % 2 === 0 ? 'bg-white dark:bg-[#1f2937]' : 'bg-gray-50 dark:bg-[#162132]'} hover:bg-gray-100 dark:hover:bg-[#2d3748]`}>
                                 <td className="p-2 font-semibold min-w-0">
-                                    <div className="truncate flex items-center" title={`${p.member} (${p.flat})`}>
-                                        <span className="truncate">{p.member} ({p.flat})</span>
+                                    <div className="truncate flex items-center" title={getMemberName(p)}>
+                                        <span className="truncate">{getMemberName(p)}</span>
                                         <LateBadge p={p} />
                                     </div>
                                 </td>

@@ -10,7 +10,6 @@ import DashboardStats from './DashboardStats';
 import QuickActions from './QuickActions';
 import NoticesManager from './NoticesManager';
 import Header from './Header';
-import SystemStatus from './SystemStatus';
 import Footer from './Footer';
 
 const AdminDashboard = () => {
@@ -75,7 +74,6 @@ const AdminDashboard = () => {
                             <MaintenanceConfigForm />
                             <QuickActions />
                             <NoticesManager />
-                            <SystemStatus />
                         </div>
                     </div>
                 </div>

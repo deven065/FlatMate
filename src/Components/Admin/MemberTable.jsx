@@ -24,7 +24,7 @@ function MemberTable() {
   const [showOnlyPending, setShowOnlyPending] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newMember, setNewMember] = useState({ name: "", flat: "", email: "", dues: 0, paid: 0, status: "Active", password: "" });
+  const [newMember, setNewMember] = useState({ name: "", flat: "", email: "", status: "Active", password: "" });
   const [generatedCreds, setGeneratedCreds] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
@@ -61,7 +61,9 @@ function MemberTable() {
   // Load maintenance config for due date and late fee
   useEffect(() => {
     const cfgRef = ref(db, 'config/maintenance');
-    const off = onValue(cfgRef, (snap) => setConfig(snap.val() || null));
+    const off = onValue(cfgRef, (snap) => {
+      setConfig(snap.val() || null);
+    });
     return () => off();
   }, []);
 
@@ -104,7 +106,7 @@ function MemberTable() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `members-${showOnlyPending ? 'pending' : 'all'}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = 'Members List.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -113,25 +115,26 @@ function MemberTable() {
   };
 
   const handleAddMember = async () => {
-    const { name, flat, email, dues, password } = newMember;
+    const { name, flat, email, password } = newMember;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!name.trim() || !flat.trim() || !email.trim() || !password.trim()) { pushToast({ type: "error", title: "Missing fields", description: "Name, Flat, Email and Password are required." }); return; }
     if (!emailRegex.test(email)) { pushToast({ type: "error", title: "Invalid email" }); return; }
     if (password.length < 6) { pushToast({ type: "error", title: "Weak password", description: "Min 6 characters" }); return; }
-    const duesNumber = Number(dues);
-    if (!Number.isFinite(duesNumber) || duesNumber < 0) { pushToast({ type: "error", title: "Invalid dues" }); return; }
+    
+    // Use maintenance charge from config for new members
+    const maintenanceDues = Number(config?.maintenanceCharge || 0);
 
     const auth = getAuth();
     setCreating(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
-      const userProfile = { fullName: name, flatNumber: flat, email, role: "member", dues: duesNumber, paid: 0, status: "Active", createdAt: Date.now() };
+      const userProfile = { fullName: name, flatNumber: flat, email, role: "member", dues: maintenanceDues, paid: 0, status: "Active", createdAt: Date.now() };
       await set(ref(db, `users/${uid}`), userProfile);
       setGeneratedCreds({ email, password });
-      pushToast({ type: "success", title: "Member added", description: `${name} has been added.` });
+      pushToast({ type: "success", title: "Member added", description: `${name} has been added with ₹${maintenanceDues} pending dues.` });
       setShowForm(false);
-      setNewMember({ name: "", flat: "", email: "", dues: 0, paid: 0, status: "Active", password: "" });
+      setNewMember({ name: "", flat: "", email: "", status: "Active", password: "" });
     } catch (err) {
       console.error(err);
       pushToast({ type: "error", title: "Add member failed", description: err.message });
@@ -278,12 +281,14 @@ function MemberTable() {
 
       {showForm && (
         <Motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18, ease: 'easeOut' }} className="bg-gray-100 dark:bg-[#374151] p-4 rounded mb-4">
+          <div className="mb-3 text-sm text-blue-600 dark:text-blue-400">
+            <strong>Note:</strong> Maintenance charge of ₹{config?.maintenanceCharge || 0} will be automatically added as pending dues.
+          </div>
           <div className="grid sm:grid-cols-2 gap-4 mb-2">
             <input type="text" placeholder="Name" value={newMember.name} onChange={(e) => setNewMember({ ...newMember, name: e.target.value })} className="px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-[#1f2937] dark:border-gray-700" />
             <input type="text" placeholder="Flat No." value={newMember.flat} onChange={(e) => setNewMember({ ...newMember, flat: e.target.value })} className="px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-[#1f2937] dark:border-gray-700" />
             <input type="email" placeholder="Email" value={newMember.email} onChange={(e) => setNewMember({ ...newMember, email: e.target.value })} className="px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-[#1f2937] dark:border-gray-700" />
             <input type="password" placeholder="Password" value={newMember.password} onChange={(e) => setNewMember({ ...newMember, password: e.target.value })} className="px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-[#1f2937] dark:border-gray-700" />
-            <input type="number" placeholder="Dues" value={newMember.dues} onChange={(e) => setNewMember({ ...newMember, dues: e.target.value })} className="px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-[#1f2937] dark:border-gray-700" />
           </div>
           <Motion.button whileHover={{ scale: creating ? 1 : 1.02 }} whileTap={{ scale: creating ? 1 : 0.98 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition" onClick={handleAddMember} disabled={creating}>
             {creating ? 'Creating…' : 'Submit'}
