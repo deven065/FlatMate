@@ -391,7 +391,7 @@ function MemberTable() {
                       return pending > 0 ? (
                         <span className="text-red-600 font-semibold">{formatCurrency(pending)}</span>
                       ) : (
-                        <span className="text-green-600 font-semibold">Clear</span>
+                        <span className="text-gray-600 font-semibold">{formatCurrency(0)}</span>
                       );
                     })()
                   )}
