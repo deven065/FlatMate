@@ -57,8 +57,17 @@ export default function RecentPayments() {
             'manual edit': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 border border-gray-300/50',
             unknown: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 border border-gray-300/50',
         };
+        const displayNames = {
+            upi: 'UPI',
+            cash: 'Cash',
+            card: 'Card',
+            'bank transfer': 'Bank Transfer',
+            'manual edit': 'Manual Edit',
+            unknown: 'Unknown',
+        };
         const cls = map[m] || map.unknown;
-        return <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${cls}`}>{method || 'Unknown'}</span>;
+        const displayName = displayNames[m] || 'Unknown';
+        return <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${cls}`}>{displayName}</span>;
     };
 
     const LateBadge = ({ p }) => {

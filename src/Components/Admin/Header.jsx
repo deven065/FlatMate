@@ -11,17 +11,20 @@ import {
     FaReceipt,
     FaBullhorn,
     FaQuestionCircle,
-    FaMoon,
     FaBell,
     FaUserCircle,
-    FaSignOutAlt,
-    FaSun
+    FaSignOutAlt
 } from "react-icons/fa";
 
 export default function Header() {
     const [userData, setUserData] = useState({ fullName: "", role: "" });
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([
+        { id: 1, title: "New Payment Received", message: "Deven Rikame paid ₹3,400", time: "2 hours ago", read: false },
+        { id: 2, title: "New Member Added", message: "Sakshi Soni joined the society", time: "5 hours ago", read: false },
+        { id: 3, title: "Maintenance Due", message: "Payment deadline is approaching", time: "1 day ago", read: false }
+    ]);
     const notificationRef = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
@@ -65,16 +68,21 @@ export default function Header() {
             });
     };
 
-    const toggleDarkMode = () => {
-        const newMode = !isDarkMode;
-        setIsDarkMode(newMode);
-        localStorage.setItem("darkMode", newMode);
-        if (newMode) {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
+    const markAsRead = (notificationId) => {
+        setNotifications(prevNotifications =>
+            prevNotifications.map(notif =>
+                notif.id === notificationId ? { ...notif, read: true } : notif
+            )
+        );
     };
+
+    const clearAllNotifications = () => {
+        setNotifications(prevNotifications =>
+            prevNotifications.map(notif => ({ ...notif, read: true }))
+        );
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     // Close notifications when clicking outside
     useEffect(() => {
@@ -123,15 +131,6 @@ export default function Header() {
 
             {/* Right section */}
             <div className="flex items-center gap-4 text-sm relative">
-                {/* Dark Mode Toggle */}
-                <button onClick={toggleDarkMode} title="Toggle Dark Mode">
-                    {isDarkMode ? (
-                        <FaSun className="cursor-pointer text-yellow-400 hover:text-white" />
-                    ) : (
-                        <FaMoon className="cursor-pointer text-gray-600 dark:text-gray-400 hover:text-white" />
-                    )}
-                </button>
-
                 {/* Notification Bell with Popup */}
                 <div className="relative" ref={notificationRef}>
                     <button 
@@ -140,7 +139,9 @@ export default function Header() {
                         title="Notifications"
                     >
                         <FaBell className="cursor-pointer text-gray-600 dark:text-gray-400 hover:text-white" />
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{unreadCount}</span>
+                        )}
                     </button>
 
                     {/* Notification Dropdown */}
@@ -150,45 +151,42 @@ export default function Header() {
                                 <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                             </div>
                             <div className="max-h-96 overflow-y-auto">
-                                <div className="p-3 hover:bg-gray-100 dark:hover:bg-[#374151] cursor-pointer border-b border-gray-100 dark:border-gray-700">
-                                    <div className="flex items-start gap-2">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">New Payment Received</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Deven Rikame paid ₹3,400</p>
-                                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">2 hours ago</p>
-                                        </div>
+                                {notifications.length === 0 ? (
+                                    <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                                        <p className="text-sm">No notifications</p>
                                     </div>
-                                </div>
-                                <div className="p-3 hover:bg-gray-100 dark:hover:bg-[#374151] cursor-pointer border-b border-gray-100 dark:border-gray-700">
-                                    <div className="flex items-start gap-2">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">New Member Added</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Sakshi Soni joined the society</p>
-                                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">5 hours ago</p>
+                                ) : (
+                                    notifications.map((notif) => (
+                                        <div 
+                                            key={notif.id}
+                                            onClick={() => markAsRead(notif.id)}
+                                            className={`p-3 hover:bg-gray-100 dark:hover:bg-[#374151] cursor-pointer border-b border-gray-100 dark:border-gray-700 transition ${
+                                                notif.read ? 'opacity-60' : ''
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-2">
+                                                {!notif.read && <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>}
+                                                {notif.read && <div className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full mt-1.5"></div>}
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{notif.title}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{notif.message}</p>
+                                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{notif.time}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="p-3 hover:bg-gray-100 dark:hover:bg-[#374151] cursor-pointer border-b border-gray-100 dark:border-gray-700">
-                                    <div className="flex items-start gap-2">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">Maintenance Due</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Payment deadline is approaching</p>
-                                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">1 day ago</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                    ))
+                                )}
                             </div>
-                            <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-                                <button 
-                                    onClick={() => setShowNotifications(false)}
-                                    className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:underline py-1"
-                                >
-                                    Clear All
-                                </button>
-                            </div>
+                            {unreadCount > 0 && (
+                                <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+                                    <button 
+                                        onClick={clearAllNotifications}
+                                        className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:underline py-1"
+                                    >
+                                        Mark All as Read
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
